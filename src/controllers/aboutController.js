@@ -1,4 +1,5 @@
 import About from '../models/About.js';
+import { uploadToCloudinary } from '../utils/cloudinary.js';
 
 // @desc    Get about page content
 // @route   GET /api/about
@@ -74,9 +75,10 @@ export const updateAbout = async (req, res) => {
       about.hero.kicker = hero.kicker || about.hero.kicker;
       about.hero.title = hero.title || about.hero.title;
       about.hero.subtitle = hero.subtitle || about.hero.subtitle;
-      if (req.files && req.files.heroImage) {
-        about.hero.image = `/uploads/${req.files.heroImage[0].filename}`;
-      }
+    }
+
+    if (req.body.heroImage) {
+      about.hero.image = await uploadToCloudinary(req.body.heroImage);
     }
 
     if (halfSections) {
@@ -113,9 +115,10 @@ export const updateAbout = async (req, res) => {
       about.cta.title = title || about.cta.title;
       about.cta.subtitle = subtitle || about.cta.subtitle;
       about.cta.buttonText = buttonText || about.cta.buttonText;
-      if (req.files && req.files.ctaImage) {
-        about.cta.image = `/uploads/${req.files.ctaImage[0].filename}`;
-      }
+    }
+
+    if (req.body.ctaImage) {
+      about.cta.image = await uploadToCloudinary(req.body.ctaImage);
     }
 
     about.updatedAt = Date.now();

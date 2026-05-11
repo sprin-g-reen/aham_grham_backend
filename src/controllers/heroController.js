@@ -1,5 +1,6 @@
 import Hero from '../models/Hero.js';
 import { logActivity } from '../utils/logger.js';
+import { uploadToCloudinary } from '../utils/cloudinary.js';
 
 export const getHero = async (req, res) => {
   try {
@@ -130,8 +131,8 @@ export const updateHero = async (req, res) => {
     hero.subtitle = req.body.subtitle || hero.subtitle;
     hero.buttonText = req.body.buttonText || hero.buttonText;
 
-    if (req.file) {
-      hero.image = `/uploads/${req.file.filename}`;
+    if (req.body.heroImage) {
+      hero.image = await uploadToCloudinary(req.body.heroImage);
     }
 
     if (req.body.sections) {

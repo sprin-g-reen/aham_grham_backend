@@ -1,5 +1,6 @@
 import Program from '../models/Program.js';
 import { logActivity } from '../utils/logger.js';
+import { uploadToCloudinary } from '../utils/cloudinary.js';
 
 // @desc    Get all programs
 // @route   GET /api/programs
@@ -32,7 +33,7 @@ export const createProgram = async (req, res) => {
       bookingPrice,
       category: category || '',
       description,
-      image: req.file ? `/uploads/${req.file.filename}` : ''
+      image: req.body.image ? await uploadToCloudinary(req.body.image) : ''
     });
 
     if (program) {
@@ -87,8 +88,8 @@ export const updateProgram = async (req, res) => {
       program.bookingPrice = bookingPrice || program.bookingPrice;
       program.description = description || program.description;
 
-      if (req.file) {
-        program.image = `/uploads/${req.file.filename}`;
+      if (req.body.image) {
+        program.image = await uploadToCloudinary(req.body.image);
       }
 
       const updatedProgram = await program.save();
@@ -98,6 +99,22 @@ export const updateProgram = async (req, res) => {
         description: `Updated program ${updatedProgram.name} (${updatedProgram.programId})`
       });
       res.json(updatedProgram);
+    } else {
+      res.status(404).json({ message: 'Program not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get single program
+// @route   GET /api/programs/:id
+// @access  Public
+export const getProgramById = async (req, res) => {
+  try {
+    const program = await Program.findById(req.params.id);
+    if (program) {
+      res.json(program);
     } else {
       res.status(404).json({ message: 'Program not found' });
     }
