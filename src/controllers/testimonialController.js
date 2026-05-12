@@ -1,5 +1,6 @@
 import Testimonial from '../models/Testimonial.js';
 import { logActivity } from '../utils/logger.js';
+import { generateNextId } from '../utils/idGenerator.js';
 
 // @desc    Get all testimonials
 // @route   GET /api/testimonials
@@ -18,16 +19,13 @@ export const getTestimonials = async (req, res) => {
 // @access  Private/Admin
 export const createTestimonial = async (req, res) => {
   try {
-    const { name, testimonialId, role, content, rating } = req.body;
+    const { name, role, content, rating } = req.body;
 
-    const testimonialExists = await Testimonial.findOne({ testimonialId });
-    if (testimonialExists) {
-      return res.status(400).json({ message: 'Testimonial ID already exists' });
-    }
+    const generatedId = await generateNextId('Testimonial', 'TESTI', 3);
 
     const testimonial = await Testimonial.create({
       name,
-      testimonialId,
+      testimonialId: generatedId,
       role,
       content,
       rating: Number(rating),
@@ -38,7 +36,8 @@ export const createTestimonial = async (req, res) => {
       await logActivity({
         action: 'CREATE',
         module: 'Testimonials',
-        description: `Created testimonial for ${name} (${testimonialId})`
+        description: `Created testimonial for ${name} (${generatedId})`,
+        req
       });
       res.status(201).json(testimonial);
     } else {

@@ -1,13 +1,14 @@
 import Program from '../models/Program.js';
 import { logActivity } from '../utils/logger.js';
 import { uploadToCloudinary } from '../utils/cloudinary.js';
+import { generateNextId } from '../utils/idGenerator.js';
 
 // @desc    Get all programs
 // @route   GET /api/programs
 // @access  Public
 export const getPrograms = async (req, res) => {
   try {
-    const programs = await Program.find({});
+    const programs = await Program.find({}).sort({ createdAt: -1 });
     res.json(programs);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -19,17 +20,13 @@ export const getPrograms = async (req, res) => {
 // @access  Private/Admin
 export const createProgram = async (req, res) => {
   try {
-    const { name, programId, bookingPrice, category, description } = req.body;
+    const { name, bookingPrice, category, description } = req.body;
 
-    const programExists = await Program.findOne({ programId });
-
-    if (programExists) {
-      return res.status(400).json({ message: 'Program ID already exists' });
-    }
+    const generatedId = await generateNextId('Program', 'PROG', 0);
 
     const program = await Program.create({
       name,
-      programId,
+      programId: generatedId,
       bookingPrice,
       category: category || '',
       description,
@@ -40,7 +37,7 @@ export const createProgram = async (req, res) => {
       await logActivity({
         action: 'CREATE',
         module: 'Programs',
-        description: `Created program ${name} (${programId})`,
+        description: `Created program ${name} (${generatedId})`,
         req
       });
       res.status(201).json(program);

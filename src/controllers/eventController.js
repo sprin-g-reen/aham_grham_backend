@@ -1,6 +1,7 @@
 import Event from '../models/Event.js';
 import { logActivity } from '../utils/logger.js';
 import { v2 as cloudinary } from 'cloudinary';
+import { generateNextId } from '../utils/idGenerator.js';
 
 // Cloudinary Configuration
 cloudinary.config({
@@ -26,7 +27,7 @@ const uploadToCloudinary = async (base64Str) => {
 // @access  Public
 export const getEvents = async (req, res) => {
   try {
-    const events = await Event.find({});
+    const events = await Event.find({}).sort({ createdAt: -1 });
     res.json(events);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -38,13 +39,18 @@ export const getEvents = async (req, res) => {
 // @access  Private/Admin
 export const createEvent = async (req, res) => {
   try {
-    const { name, eventId, bookingPrice, description, about, category, isBlog } = req.body;
+    const { name, bookingPrice, description, about, category, isBlog } = req.body;
 
-    const eventExists = await Event.findOne({ eventId });
+    // Map categories to specific prefixes
+    const categoryPrefixMap = {
+      'Main Event': 'MAEV',
+      'Workshop': 'WKS',
+      'Highlight': 'HIGH',
+      'Upcoming Event': 'UPEV'
+    };
 
-    if (eventExists) {
-      return res.status(400).json({ message: 'Event ID already exists' });
-    }
+    const prefix = categoryPrefixMap[category] || 'EVENT';
+    const generatedId = await generateNextId(`Event_${prefix}`, prefix, 3);
 
     let imageUrl = req.body.image || '';
     let videoUrl = req.body.video || '';
@@ -57,7 +63,7 @@ export const createEvent = async (req, res) => {
 
     const event = await Event.create({
       name,
-      eventId,
+      eventId: generatedId,
       bookingPrice: category === 'Highlight' ? 0 : Number(bookingPrice || 0),
       description,
       about,
@@ -71,7 +77,7 @@ export const createEvent = async (req, res) => {
       await logActivity({
         action: 'CREATE',
         module: 'Events',
-        description: `Created event ${name} (${eventId})`,
+        description: `Created event ${name} (${generatedId})`,
         req
       });
       res.status(201).json(event);
