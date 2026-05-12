@@ -42,7 +42,8 @@ export const createCenter = async (req, res) => {
     await logActivity({
       action: 'CREATE',
       module: 'Centers',
-      description: `Created new center: ${name} in ${location}`
+      description: `Created new center: ${name} in ${location}`,
+      req
     });
     res.status(201).json(savedCenter);
   } catch (error) {
@@ -79,7 +80,8 @@ export const updateCenter = async (req, res) => {
       await logActivity({
         action: 'UPDATE',
         module: 'Centers',
-        description: `Updated center: ${updatedCenter.name}`
+        description: `Updated center: ${updatedCenter.name}`,
+        req
       });
       res.json(updatedCenter);
     } else {
@@ -102,7 +104,8 @@ export const deleteCenter = async (req, res) => {
     await logActivity({
       action: 'DELETE',
       module: 'Centers',
-      description: `Deleted center: ${name}`
+      description: `Deleted center: ${name}`,
+      req
     });
     res.json({ message: 'Center deleted successfully' });
   } catch (error) {

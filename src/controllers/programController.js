@@ -40,7 +40,8 @@ export const createProgram = async (req, res) => {
       await logActivity({
         action: 'CREATE',
         module: 'Programs',
-        description: `Created program ${name} (${programId})`
+        description: `Created program ${name} (${programId})`,
+        req
       });
       res.status(201).json(program);
     } else {
@@ -64,7 +65,8 @@ export const deleteProgram = async (req, res) => {
       await logActivity({
         action: 'DELETE',
         module: 'Programs',
-        description: `Deleted program ${name} (${programId})`
+        description: `Deleted program ${name} (${programId})`,
+        req
       });
       res.json({ message: 'Program removed' });
     } else {
@@ -96,7 +98,8 @@ export const updateProgram = async (req, res) => {
       await logActivity({
         action: 'UPDATE',
         module: 'Programs',
-        description: `Updated program ${updatedProgram.name} (${updatedProgram.programId})`
+        description: `Updated program ${updatedProgram.name} (${updatedProgram.programId})`,
+        req
       });
       res.json(updatedProgram);
     } else {

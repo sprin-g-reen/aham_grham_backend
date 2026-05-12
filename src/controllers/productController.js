@@ -33,7 +33,8 @@ export const createProduct = async (req, res) => {
     await logActivity({
       action: 'CREATE',
       module: 'Products',
-      description: `Created product ${name} (SKU: ${sku})`
+      description: `Created product ${name} (SKU: ${sku})`,
+      req
     });
     res.status(201).json(createdProduct);
   } catch (error) {
@@ -108,7 +109,8 @@ export const updateProduct = async (req, res) => {
       await logActivity({
         action: 'UPDATE',
         module: 'Products',
-        description: `Updated product ${updatedProduct.name} (SKU: ${updatedProduct.sku})`
+        description: `Updated product ${updatedProduct.name} (SKU: ${updatedProduct.sku})`,
+        req
       });
       res.status(200).json(updatedProduct);
     } else {
@@ -133,7 +135,8 @@ export const deleteProduct = async (req, res) => {
       await logActivity({
         action: 'DELETE',
         module: 'Products',
-        description: `Deleted product ${name} (SKU: ${sku})`
+        description: `Deleted product ${name} (SKU: ${sku})`,
+        req
       });
       res.status(200).json({ message: 'Product removed' });
     } else {

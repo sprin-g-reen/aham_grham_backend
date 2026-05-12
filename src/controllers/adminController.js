@@ -16,7 +16,8 @@ const authAdmin = async (req, res) => {
       user: admin.name,
       action: 'LOGIN',
       module: 'Authentication',
-      description: `Admin logged in: ${admin.name}`
+      description: `Admin logged in: ${admin.name}`,
+      req
     });
 
     res.json({
@@ -56,7 +57,8 @@ const registerAdmin = async (req, res) => {
       user: 'System',
       action: 'CREATE',
       module: 'Authentication',
-      description: `New admin account created: ${admin.name} (${admin.email})`
+      description: `New admin account created: ${admin.name} (${admin.email})`,
+      req
     });
 
     res.status(201).json({
@@ -99,7 +101,8 @@ const logoutAdmin = async (req, res) => {
       user: name || 'Admin',
       action: 'LOGOUT',
       module: 'Authentication',
-      description: `Admin logged out: ${name || 'Unknown'}`
+      description: `Admin logged out: ${name || 'Unknown'}`,
+      req
     });
     res.json({ message: 'Logged out successfully' });
   } catch (error) {

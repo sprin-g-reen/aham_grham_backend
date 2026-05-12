@@ -71,7 +71,8 @@ export const createEvent = async (req, res) => {
       await logActivity({
         action: 'CREATE',
         module: 'Events',
-        description: `Created event ${name} (${eventId})`
+        description: `Created event ${name} (${eventId})`,
+        req
       });
       res.status(201).json(event);
     }
@@ -118,7 +119,8 @@ export const updateEvent = async (req, res) => {
       await logActivity({
         action: 'UPDATE',
         module: 'Events',
-        description: `Updated event ${event.name} (${event.eventId})`
+        description: `Updated event ${event.name} (${event.eventId})`,
+        req
       });
       res.json(updatedEvent);
     } else {
@@ -145,7 +147,8 @@ export const toggleBlogStatus = async (req, res) => {
       await logActivity({
         action: 'UPDATE',
         module: 'Events',
-        description: `${updatedEvent.isBlog ? 'Added' : 'Removed'} event ${updatedEvent.name} ${updatedEvent.isBlog ? 'to' : 'from'} Blog`
+        description: `${updatedEvent.isBlog ? 'Added' : 'Removed'} event ${updatedEvent.name} ${updatedEvent.isBlog ? 'to' : 'from'} Blog`,
+        req
       });
       res.json(updatedEvent);
     } else {
@@ -169,7 +172,8 @@ export const deleteEvent = async (req, res) => {
       await logActivity({
         action: 'DELETE',
         module: 'Events',
-        description: `Deleted event ${name} (${eventId})`
+        description: `Deleted event ${name} (${eventId})`,
+        req
       });
       res.json({ message: 'Event removed' });
     } else {
