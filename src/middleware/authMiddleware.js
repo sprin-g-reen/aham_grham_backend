@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import Admin from '../models/Admin.js';
 
 const protect = async (req, res, next) => {
   let token;
@@ -13,17 +14,26 @@ const protect = async (req, res, next) => {
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret123');
 
-      req.user = await User.findById(decoded.id).select('-password');
+      // Try finding in User first, then Admin
+      let user = await User.findById(decoded.id).select('-password');
+      if (!user) {
+        user = await Admin.findById(decoded.id).select('-password');
+      }
 
+      if (!user) {
+        return res.status(401).json({ message: 'Not authorized, user not found' });
+      }
+
+      req.user = user;
       next();
     } catch (error) {
       console.error(error);
-      res.status(401).json({ message: 'Not authorized, token failed' });
+      return res.status(401).json({ message: 'Not authorized, token failed' });
     }
   }
 
   if (!token) {
-    res.status(401).json({ message: 'Not authorized, no token' });
+    return res.status(401).json({ message: 'Not authorized, no token' });
   }
 };
 

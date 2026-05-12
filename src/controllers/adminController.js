@@ -110,6 +110,35 @@ const logoutAdmin = async (req, res) => {
   }
 };
 
+// @desc    Update admin password
+// @route   PUT /api/admins/password
+// @access  Private
+const updateAdminPassword = async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  const admin = await Admin.findById(req.user?._id);
+
+  if (!admin) {
+    return res.status(404).json({ message: 'Admin not found' });
+  }
+
+  if (await admin.matchPassword(oldPassword)) {
+    admin.password = newPassword;
+    await admin.save();
+    
+    await logActivity({
+      user: admin.name,
+      action: 'UPDATE',
+      module: 'Account',
+      description: `Admin updated password: ${admin.name}`,
+      req
+    });
+
+    res.json({ message: 'Password updated successfully' });
+  } else {
+    res.status(401).json({ message: 'Invalid old password' });
+  }
+};
+
 // Generate JWT
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET || 'secret123', {
@@ -117,4 +146,4 @@ const generateToken = (id) => {
   });
 };
 
-export { authAdmin, registerAdmin, getAdminProfile, logoutAdmin };
+export { authAdmin, registerAdmin, getAdminProfile, logoutAdmin, updateAdminPassword };
