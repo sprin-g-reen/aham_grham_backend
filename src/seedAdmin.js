@@ -6,30 +6,37 @@ import connectDB from './config/db.js';
 dotenv.config();
 connectDB();
 
-const forceUpdateAdmin = async () => {
+const checkAndFixAdmins = async () => {
   try {
-    const email = 'admin123@gmail.com';
     const password = 'Admin@123';
     
-    let admin = await Admin.findOne({ email });
-    
-    if (!admin) {
-      admin = await Admin.create({
-        name: 'Admin',
-        email,
-        password,
-      });
-      console.log('✅ Default admin created');
-    } else {
-      admin.password = password;
-      await admin.save();
-      console.log('✅ Admin password force-updated to Admin@123');
+    const emailsToSync = [
+      'admin123@gmail.com',
+      'admin@123gmail.com',
+      'admin@ahamgrham.com'
+    ];
+
+    for (const email of emailsToSync) {
+      let admin = await Admin.findOne({ email });
+      if (!admin) {
+        await Admin.create({
+          name: 'Admin',
+          email,
+          password,
+        });
+        console.log(`✅ Created ${email}`);
+      } else {
+        admin.password = password;
+        await admin.save();
+        console.log(`✅ Updated ${email} password to Admin@123`);
+      }
     }
+
     process.exit();
   } catch (error) {
-    console.error('❌ Error updating admin:', error);
+    console.error('❌ Error:', error);
     process.exit(1);
   }
 };
 
-forceUpdateAdmin();
+checkAndFixAdmins();
