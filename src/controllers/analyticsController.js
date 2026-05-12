@@ -1,5 +1,9 @@
 import Analytics from '../models/Analytics.js';
 import crypto from 'crypto';
+import { getGA4Stats } from '../services/ga4Service.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 // Helper to hash IP
 const hashIP = (ip) => {
@@ -29,7 +33,18 @@ export const trackActivity = async (req, res) => {
 
 export const getStats = async (req, res) => {
     try {
-        // Get total counts
+        // If GA4 is configured, use it
+        if (process.env.GA_PROPERTY_ID) {
+            try {
+                const gaStats = await getGA4Stats();
+                return res.status(200).json(gaStats);
+            } catch (gaError) {
+                console.error('GA4 Fetch Error, falling back to local stats:', gaError);
+                // Fallback to local stats if GA4 fails
+            }
+        }
+
+        // Get total counts from local DB
         const totalVisitors = await Analytics.countDocuments({ type: 'visitor' });
         const totalViews = await Analytics.countDocuments({ type: 'view' });
 
