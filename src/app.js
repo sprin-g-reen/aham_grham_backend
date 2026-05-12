@@ -41,26 +41,27 @@ const app = express();
 
 // --- Standard Middleware ---
 // 1. CORS - MUST BE FIRST
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    const allowedOrigins = [
-      'https://aham-grham-website.vercel.app',
-      'https://aham-grham-admin.vercel.app',
-      'http://localhost:3000',
-      'http://localhost:5173',
-      'http://localhost:5000'
-    ];
-    if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+if (process.env.NODE_ENV === 'development') {
+  app.use(cors());
+} else {
+  app.use(cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      const allowedOrigins = [
+        'https://aham-grham-website.vercel.app',
+        'https://aham-grham-admin.vercel.app'
+      ];
+      if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  }));
+}
 
 // 2. Logging
 app.use((req, res, next) => {
