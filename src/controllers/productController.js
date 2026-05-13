@@ -8,7 +8,7 @@ import { uploadToCloudinary } from '../utils/cloudinary.js';
 export const createProduct = async (req, res) => {
   console.log('📦 Create Product Request:', { ...req.body, image: req.body.image ? 'Base64 data...' : 'None' });
   try {
-    const { name, price, category, description, isMostSelling, offer, sku, tax, stockStatus, image } = req.body;
+    const { name, price, category, description, isMostSelling, offer, sku, tax, stockStatus, features, image } = req.body;
 
     let imageUrl = image || '';
     if (imageUrl && imageUrl.startsWith('data:')) {
@@ -26,7 +26,8 @@ export const createProduct = async (req, res) => {
       offer,
       sku,
       tax,
-      stockStatus
+      stockStatus,
+      features: features || []
     });
 
     const createdProduct = await product.save();
@@ -77,8 +78,9 @@ export const getSingleProduct = async (req, res) => {
 // @route   PUT /api/products/:id
 // @access  Private/Admin
 export const updateProduct = async (req, res) => {
+  console.log('🔄 Update Product Request:', { id: req.params.id, ...req.body, image: req.body.image ? 'Base64 data...' : 'None' });
   try {
-    const { name, price, category, description, isMostSelling, offer, sku, tax, stockStatus, image } = req.body;
+    const { name, price, category, description, isMostSelling, offer, sku, tax, stockStatus, features, image } = req.body;
     const product = await Product.findById(req.params.id);
 
     if (product) {
@@ -90,6 +92,9 @@ export const updateProduct = async (req, res) => {
       product.sku = sku || product.sku;
       product.tax = tax || product.tax;
       product.stockStatus = stockStatus || product.stockStatus;
+      if (req.body.features !== undefined) {
+        product.features = req.body.features;
+      }
 
       if (isMostSelling !== undefined) {
         product.isMostSelling = isMostSelling === 'true' || isMostSelling === true;
