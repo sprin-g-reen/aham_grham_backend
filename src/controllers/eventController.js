@@ -43,8 +43,8 @@ export const createEvent = async (req, res) => {
 
     // Map categories to specific prefixes
     const categoryPrefixMap = {
-      'Main Event': 'MAEV',
-      'Workshop': 'WKS',
+      'Regularly Happening': 'MAEV',
+      'Regular events': 'WKS',
       'Highlight': 'HIGH',
       'Upcoming Event': 'UPEV'
     };

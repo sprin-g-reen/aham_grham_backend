@@ -18,8 +18,8 @@ const eventSchema = mongoose.Schema(
     },
     category: {
       type: String,
-      enum: ['Main Event', 'Workshop', 'Highlight', 'Upcoming Event'],
-      default: 'Main Event'
+      enum: ['Regularly Happening', 'Regular events', 'Highlight', 'Upcoming Event'],
+      default: 'Regularly Happening'
     },
     description: {
       type: String,

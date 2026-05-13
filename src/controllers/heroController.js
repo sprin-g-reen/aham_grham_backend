@@ -74,7 +74,7 @@ export const getHero = async (req, res) => {
 
     if (page === 'events') {
       if (!hero.sections.mainEvents) {
-        hero.sections.mainEvents = { title: 'Main Events', description: 'curated experiences that bridge ancient wisdom with modern neurological transformation.' };
+        hero.sections.mainEvents = { title: 'Regularly Happening', description: 'curated experiences that bridge ancient wisdom with modern neurological transformation.' };
         modified = true;
       }
       if (!hero.sections.highlights) {
@@ -82,7 +82,7 @@ export const getHero = async (req, res) => {
         modified = true;
       }
       if (!hero.sections.workshop) {
-        hero.sections.workshop = { title: 'workshop', description: 'intensive protocols for masters of breath and stillness.' };
+        hero.sections.workshop = { title: 'Regular events', description: 'intensive protocols for masters of breath and stillness.' };
         modified = true;
       }
       if (!hero.sections.upcoming) {
