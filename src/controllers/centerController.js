@@ -20,7 +20,7 @@ export const getCenters = async (req, res) => {
 export const createCenter = async (req, res) => {
   try {
     console.log('🏗️ Creating center with body:', { ...req.body, image: req.body.image ? 'Base64 data...' : 'None' });
-    const { name, location, description, status, image } = req.body;
+    const { name, location, description, status, image, mapLink, mapIframe } = req.body;
     
     let imageUrl = image || '';
     if (imageUrl && imageUrl.startsWith('data:')) {
@@ -35,7 +35,9 @@ export const createCenter = async (req, res) => {
       location,
       description,
       status,
-      image: imageUrl
+      image: imageUrl,
+      mapLink,
+      mapIframe
     });
 
     const savedCenter = await center.save();
@@ -56,8 +58,9 @@ export const createCenter = async (req, res) => {
 // @access  Private/Admin
 export const updateCenter = async (req, res) => {
   try {
+    console.log('🔄 Updating center with body:', { ...req.body, image: req.body.image ? 'Base64 data...' : 'None' });
     const { id } = req.params;
-    const { name, location, description, status, image } = req.body;
+    const { name, location, description, status, image, mapLink, mapIframe } = req.body;
 
     const center = await Center.findById(id);
     if (center) {
@@ -66,6 +69,8 @@ export const updateCenter = async (req, res) => {
       center.location = location || center.location;
       center.description = description || center.description;
       center.status = status || center.status;
+      center.mapLink = mapLink !== undefined ? mapLink : center.mapLink;
+      center.mapIframe = mapIframe !== undefined ? mapIframe : center.mapIframe;
       
       if (image && image.startsWith('data:')) {
         console.log('☁️ Uploading updated center image to Cloudinary...');

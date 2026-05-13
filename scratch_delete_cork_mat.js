@@ -2,15 +2,16 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const listEvents = async () => {
+const deleteProduct = async () => {
     try {
         await mongoose.connect(process.env.MONGO_URI);
         console.log('Connected to MongoDB');
         
-        const events = await mongoose.connection.db.collection('events').find({}).toArray();
-        console.log('Available events:');
-        events.forEach(e => console.log(`- ${e.name}`));
+        const result = await mongoose.connection.db.collection('products').deleteMany({
+            name: { $regex: /sacred cork mat/i }
+        });
         
+        console.log(`Deleted ${result.deletedCount} products named "sacred cork mat"`);
         process.exit(0);
     } catch (err) {
         console.error(err);
@@ -18,4 +19,4 @@ const listEvents = async () => {
     }
 };
 
-listEvents();
+deleteProduct();

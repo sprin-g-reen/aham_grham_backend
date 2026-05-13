@@ -2,8 +2,8 @@ import mongoose from 'mongoose';
 
 const footerSchema = new mongoose.Schema({
   centers: [{
-    type: String,
-    trim: true
+    name: { type: String, required: true },
+    link: { type: String, default: '#' }
   }],
   socialMedia: [{
     platform: { type: String, required: true },

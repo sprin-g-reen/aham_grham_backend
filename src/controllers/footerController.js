@@ -11,7 +11,11 @@ export const getFooter = async (req, res) => {
     // Create default footer if none exists
     if (!footer) {
       footer = await Footer.create({
-        centers: ['Rishikesh, India', 'Swiss Alps, Switzerland', 'Ubud, Bali'],
+        centers: [
+          { name: 'Rishikesh, India', link: '#' },
+          { name: 'Swiss Alps, Switzerland', link: '#' },
+          { name: 'Ubud, Bali', link: '#' }
+        ],
         socialMedia: [
           { platform: 'Facebook', url: '#' },
           { platform: 'Instagram', url: '#' },
@@ -24,6 +28,23 @@ export const getFooter = async (req, res) => {
         },
         slogan: 'bridging ancient wisdom with modern neurological insights. your path to biological transcendence begins here.'
       });
+    }
+
+    // Migration: If centers contains strings instead of objects, convert them
+    if (footer && footer.centers && footer.centers.length > 0) {
+      let needsMigration = false;
+      const migratedCenters = footer.centers.map(c => {
+        if (typeof c === 'string') {
+          needsMigration = true;
+          return { name: c, link: '#' };
+        }
+        return c;
+      });
+
+      if (needsMigration) {
+        footer.centers = migratedCenters;
+        await footer.save();
+      }
     }
     
     res.json(footer);

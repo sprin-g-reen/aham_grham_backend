@@ -9,15 +9,18 @@ const aboutSchema = new mongoose.Schema({
   },
   halfSections: {
     type: [{
+      kicker: { type: String },
       title: { type: String },
       content: { type: String }
     }],
     default: [
       {
+        kicker: 'our goals',
         title: 'architectural soul',
         content: 'our sanctuary design follows sacred proportions inspired by both references you shared, creating balance between grounded practice and reflective stillness. every curve and angle is designed to channel natural light, fostering a sense of openness and tranquility that mirrors the expansive nature of the human spirit.'
       },
       {
+        kicker: 'our knowledge',
         title: 'breath of the earth',
         content: 'our daily practice is rooted in sustainability, intentional movement, and calm nervous-system support, so each class feels like a reset for both body and environment. we prioritize locally-sourced, non-toxic materials, ensuring that our presence is a healing force for the community and the planet alike.'
       }

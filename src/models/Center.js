@@ -24,6 +24,16 @@ const centerSchema = new mongoose.Schema({
     type: String,
     required: false
   },
+  mapLink: {
+    type: String,
+    required: false,
+    trim: true
+  },
+  mapIframe: {
+    type: String,
+    required: false,
+    trim: true
+  },
   createdAt: {
     type: Date,
     default: Date.now
