@@ -39,24 +39,14 @@ const aboutSchema = new mongoose.Schema({
     kicker: { type: String, default: 'ancient lineage' },
     content: { type: String, default: '500+ years of oral wisdom carried through movement, breath, and devotion. a commitment to preserving the sacred geometry of the soul through rigorous clinical practice.' }
   },
-  faculties: {
-    title: { type: String, default: 'spiritual guides' },
-    subtitle: { type: String, default: 'the faculty who carry our lineage and walk the path with you.' },
-    guides: [
-      {
-        name: { type: String },
-        role: { type: String },
-        bio: { type: String },
-        image: { type: String }
-      }
-    ]
-  },
-  cta: {
-    title: { type: String, default: 'begin your ascent' },
-    subtitle: { type: String, default: 'step into the sanctuary and experience a grounded path shaped by ancient wisdom and caring faculty guidance.' },
-    buttonText: { type: String, default: 'explore sessions' },
-    image: { type: String, default: '' }
-  },
+  timeline: [
+    {
+      year: { type: String },
+      title: { type: String },
+      description: { type: String },
+      image: { type: String }
+    }
+  ],
   updatedAt: { type: Date, default: Date.now }
 });
 

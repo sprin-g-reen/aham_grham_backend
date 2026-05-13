@@ -16,29 +16,26 @@ export const getAbout = async (req, res) => {
       if (!about.halfSections || about.halfSections.length === 0) {
         about.halfSections = [
           {
+            kicker: 'our goals',
             title: 'architectural soul',
             content: 'our sanctuary design follows sacred proportions inspired by both references you shared, creating balance between grounded practice and reflective stillness. every curve and angle is designed to channel natural light, fostering a sense of openness and tranquility that mirrors the expansive nature of the human spirit.'
           },
           {
+            kicker: 'our knowledge',
             title: 'breath of the earth',
             content: 'our daily practice is rooted in sustainability, intentional movement, and calm nervous-system support, so each class feels like a reset for both body and environment. we prioritize locally-sourced, non-toxic materials, ensuring that our presence is a healing force for the community and the planet alike.'
           }
         ];
         updated = true;
       }
-      if (!about.faculties || !about.faculties.guides || about.faculties.guides.length === 0) {
-        about.faculties = {
-          title: 'spiritual guides',
-          subtitle: 'the faculty who carry our lineage and walk the path with you.',
-          guides: [
-            {
-              name: 'elena vance',
-              role: 'breathwork and flow',
-              bio: 'known for gentle sequencing that calms overactive minds and rebuilds confidence in movement. she integrates somatic movement and neuro-respiratory synchronization to help practitioners overcome physical plateaus and mental fog.',
-              image: '22.jpg'
-            }
-          ]
-        };
+      if (!about.timeline || about.timeline.length === 0) {
+        about.timeline = [
+          { year: '2018', title: 'the seed', description: 'founding of aham grham in the rishikesh mountains. a commitment to bridging clinical science with ancient breathwork.', image: 'lotus-2026-01-05-00-53-39-utc.jpg' },
+          { year: '2020', title: 'digital transition', description: 'launch of our first online clinical sanctuary, bringing neurological synchronization to homes worldwide during a global shift.', image: 'young-women-doing-yoga-sport-2026-03-24-23-12-41-utc.jpg' },
+          { year: '2022', title: 'global expansion', description: 'opening of the swiss alps sanctuary. integrating high-altitude resonance with advanced somatic recovery protocols.', image: 'multinational-women-doing-breathing-exercises-or-y-2026-01-08-23-11-26-utc.jpg' },
+          { year: '2024', title: 'innovation peak', description: 'implementation of precision-calibrated harmonic patterns and real-time neuro-respiratory monitoring in all centers.', image: 'YogaClass-GroupSessions.jpg' },
+          { year: '2026', title: 'the future', description: 'pioneering biological transcendence for the modern age, expanding to ubud and beyond with a mission of universal calm.', image: '23.jpg' }
+        ];
         updated = true;
       }
       if (updated) await about.save();
@@ -54,7 +51,7 @@ export const getAbout = async (req, res) => {
 // @access  Private/Admin
 export const updateAbout = async (req, res) => {
   try {
-    let { hero, halfSections, corePhilosophy, lineageVoice, ancientLineage } = req.body;
+    let { hero, halfSections, corePhilosophy, lineageVoice, ancientLineage, timeline } = req.body;
 
     // Parse JSON strings if they come from FormData
     if (typeof hero === 'string') hero = JSON.parse(hero);
@@ -62,14 +59,10 @@ export const updateAbout = async (req, res) => {
     if (typeof corePhilosophy === 'string') corePhilosophy = JSON.parse(corePhilosophy);
     if (typeof lineageVoice === 'string') lineageVoice = JSON.parse(lineageVoice);
     if (typeof ancientLineage === 'string') ancientLineage = JSON.parse(ancientLineage);
-    if (typeof req.body.faculties === 'string') req.body.faculties = JSON.parse(req.body.faculties);
-    if (typeof req.body.cta === 'string') req.body.cta = JSON.parse(req.body.cta);
+    if (typeof timeline === 'string') timeline = JSON.parse(timeline);
 
     let about = await About.findOne();
-
-    if (!about) {
-      about = new About();
-    }
+    if (!about) about = new About();
 
     if (hero) {
       about.hero.kicker = hero.kicker || about.hero.kicker;
@@ -81,8 +74,18 @@ export const updateAbout = async (req, res) => {
       about.hero.image = await uploadToCloudinary(req.body.heroImage);
     }
 
-    if (halfSections) {
-      about.halfSections = halfSections;
+    if (halfSections) about.halfSections = halfSections;
+    
+    if (timeline) {
+      // Handle images for timeline milestones
+      const processedTimeline = await Promise.all(timeline.map(async (item) => {
+        if (item.image && item.image.startsWith('data:')) {
+          const uploadedUrl = await uploadToCloudinary(item.image);
+          return { ...item, image: uploadedUrl };
+        }
+        return item;
+      }));
+      about.timeline = processedTimeline;
     }
 
     if (corePhilosophy) {
@@ -99,26 +102,6 @@ export const updateAbout = async (req, res) => {
     if (ancientLineage) {
       about.ancientLineage.kicker = ancientLineage.kicker || about.ancientLineage.kicker;
       about.ancientLineage.content = ancientLineage.content || about.ancientLineage.content;
-    }
-
-    if (req.body.faculties) {
-      const { title, subtitle, guides } = req.body.faculties;
-      about.faculties.title = title || about.faculties.title;
-      about.faculties.subtitle = subtitle || about.faculties.subtitle;
-      if (guides) {
-        about.faculties.guides = guides;
-      }
-    }
-
-    if (req.body.cta) {
-      const { title, subtitle, buttonText } = req.body.cta;
-      about.cta.title = title || about.cta.title;
-      about.cta.subtitle = subtitle || about.cta.subtitle;
-      about.cta.buttonText = buttonText || about.cta.buttonText;
-    }
-
-    if (req.body.ctaImage) {
-      about.cta.image = await uploadToCloudinary(req.body.ctaImage);
     }
 
     about.updatedAt = Date.now();
