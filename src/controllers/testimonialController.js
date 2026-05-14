@@ -1,6 +1,7 @@
 import Testimonial from '../models/Testimonial.js';
 import { logActivity } from '../utils/logger.js';
 import { generateNextId } from '../utils/idGenerator.js';
+import { uploadToCloudinary } from '../utils/cloudinary.js';
 
 // @desc    Get all testimonials
 // @route   GET /api/testimonials
@@ -19,7 +20,12 @@ export const getTestimonials = async (req, res) => {
 // @access  Private/Admin
 export const createTestimonial = async (req, res) => {
   try {
-    const { name, role, content, rating } = req.body;
+    const { name, role, content, rating, image } = req.body;
+
+    let imageUrl = image || '';
+    if (imageUrl && imageUrl.startsWith('data:')) {
+      imageUrl = await uploadToCloudinary(imageUrl);
+    }
 
     const generatedId = await generateNextId('Testimonial', 'TESTI', 3);
 
@@ -29,7 +35,7 @@ export const createTestimonial = async (req, res) => {
       role,
       content,
       rating: Number(rating),
-      image: req.file ? `/uploads/${req.file.filename}` : ''
+      image: imageUrl
     });
 
     if (testimonial) {
@@ -77,7 +83,7 @@ export const deleteTestimonial = async (req, res) => {
 // @access  Private/Admin
 export const updateTestimonial = async (req, res) => {
   try {
-    const { name, testimonialId, role, content, rating } = req.body;
+    const { name, testimonialId, role, content, rating, image } = req.body;
     const testimonial = await Testimonial.findById(req.params.id);
 
     if (testimonial) {
@@ -87,8 +93,10 @@ export const updateTestimonial = async (req, res) => {
       testimonial.content = content || testimonial.content;
       testimonial.rating = rating ? Number(rating) : testimonial.rating;
 
-      if (req.file) {
-        testimonial.image = `/uploads/${req.file.filename}`;
+      if (image && image.startsWith('data:')) {
+        testimonial.image = await uploadToCloudinary(image);
+      } else if (image) {
+        testimonial.image = image;
       }
 
       const updatedTestimonial = await testimonial.save();

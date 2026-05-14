@@ -27,12 +27,12 @@ const upload = multer({ storage });
 
 router.route('/')
   .get(getTestimonials)
-  .post(upload.single('image'), createTestimonial);
+  .post(createTestimonial);
 
 router.post('/bulk', bulkCreateTestimonials);
 
 router.route('/:id')
   .delete(deleteTestimonial)
-  .put(upload.single('image'), updateTestimonial);
+  .put(updateTestimonial);
 
 export default router;
