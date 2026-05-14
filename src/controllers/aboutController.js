@@ -9,12 +9,8 @@ export const getAbout = async (req, res) => {
     let about = await About.findOne();
     if (!about) {
       // Create default if not exists
-      about = await About.create({});
-    } else {
-      // Ensure halfSections and other fields have defaults if they are empty
-      let updated = false;
-      if (!about.halfSections || about.halfSections.length === 0) {
-        about.halfSections = [
+      about = await About.create({
+        halfSections: [
           {
             kicker: 'our goals',
             title: 'architectural soul',
@@ -25,20 +21,15 @@ export const getAbout = async (req, res) => {
             title: 'breath of the earth',
             content: 'our daily practice is rooted in sustainability, intentional movement, and calm nervous-system support, so each class feels like a reset for both body and environment. we prioritize locally-sourced, non-toxic materials, ensuring that our presence is a healing force for the community and the planet alike.'
           }
-        ];
-        updated = true;
-      }
-      if (!about.timeline || about.timeline.length === 0) {
-        about.timeline = [
+        ],
+        timeline: [
           { year: '2018', title: 'the seed', description: 'founding of aham grham in the rishikesh mountains. a commitment to bridging clinical science with ancient breathwork.', image: 'lotus-2026-01-05-00-53-39-utc.jpg' },
           { year: '2020', title: 'digital transition', description: 'launch of our first online clinical sanctuary, bringing neurological synchronization to homes worldwide during a global shift.', image: 'young-women-doing-yoga-sport-2026-03-24-23-12-41-utc.jpg' },
           { year: '2022', title: 'global expansion', description: 'opening of the swiss alps sanctuary. integrating high-altitude resonance with advanced somatic recovery protocols.', image: 'multinational-women-doing-breathing-exercises-or-y-2026-01-08-23-11-26-utc.jpg' },
           { year: '2024', title: 'innovation peak', description: 'implementation of precision-calibrated harmonic patterns and real-time neuro-respiratory monitoring in all centers.', image: 'YogaClass-GroupSessions.jpg' },
           { year: '2026', title: 'the future', description: 'pioneering biological transcendence for the modern age, expanding to ubud and beyond with a mission of universal calm.', image: '23.jpg' }
-        ];
-        updated = true;
-      }
-      if (updated) await about.save();
+        ]
+      });
     }
     res.json(about);
   } catch (error) {
