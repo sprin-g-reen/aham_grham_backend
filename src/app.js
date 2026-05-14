@@ -21,6 +21,7 @@ import aiTagRoutes from './routes/aiTagRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
 import footerRoutes from './routes/footerRoutes.js';
 import activityRoutes from './routes/activityRoutes.js';
+import reviewRoutes from './routes/reviewRoutes.js';
 
 
 // Import Middleware
@@ -96,6 +97,7 @@ app.use('/api/centers', centerRoutes);
 app.use('/api/aitags', aiTagRoutes);
 app.use('/api/footer', footerRoutes);
 app.use('/api/activities', activityRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 // Health Check Endpoint
 app.get('/api', (req, res) => {

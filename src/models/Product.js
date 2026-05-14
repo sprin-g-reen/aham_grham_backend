@@ -49,6 +49,21 @@ const productSchema = new mongoose.Schema({
     type: [String],
     default: []
   },
+  bannerImages: {
+    type: [String],
+    default: []
+  },
+  aiReviewSummary: {
+    type: String,
+    default: ""
+  },
+  reviewKeywords: [
+    {
+      label: String,
+      count: Number,
+      trend: { type: String, enum: ['up', 'neutral', 'down'], default: 'neutral' }
+    }
+  ],
   createdAt: {
     type: Date,
     default: Date.now

@@ -8,11 +8,23 @@ import { uploadToCloudinary } from '../utils/cloudinary.js';
 export const createProduct = async (req, res) => {
   console.log('📦 Create Product Request:', { ...req.body, image: req.body.image ? 'Base64 data...' : 'None' });
   try {
-    const { name, price, category, description, isMostSelling, offer, sku, tax, stockStatus, features, image } = req.body;
+    const { name, price, category, description, isMostSelling, offer, sku, tax, stockStatus, features, image, aiReviewSummary, reviewKeywords } = req.body;
 
     let imageUrl = image || '';
     if (imageUrl && imageUrl.startsWith('data:')) {
       imageUrl = await uploadToCloudinary(imageUrl);
+    }
+
+    let processedBannerImages = [];
+    if (req.body.bannerImages && Array.isArray(req.body.bannerImages)) {
+      for (const img of req.body.bannerImages) {
+        if (img.startsWith('data:')) {
+          const uploadedUrl = await uploadToCloudinary(img);
+          processedBannerImages.push(uploadedUrl);
+        } else {
+          processedBannerImages.push(img);
+        }
+      }
     }
 
     const product = new Product({
@@ -21,13 +33,16 @@ export const createProduct = async (req, res) => {
       category,
       description,
       image: imageUrl || 'no-photo.jpg',
+      bannerImages: processedBannerImages,
       isMostSelling: isMostSelling === 'true' || isMostSelling === true,
       isServicePage: req.body.isServicePage === 'true' || req.body.isServicePage === true,
       offer,
       sku,
       tax,
       stockStatus,
-      features: features || []
+      features: features || [],
+      aiReviewSummary: aiReviewSummary || "",
+      reviewKeywords: reviewKeywords || []
     });
 
     const createdProduct = await product.save();
@@ -108,6 +123,27 @@ export const updateProduct = async (req, res) => {
         product.image = await uploadToCloudinary(image);
       } else if (image) {
         product.image = image;
+      }
+
+      if (req.body.aiReviewSummary !== undefined) {
+        product.aiReviewSummary = req.body.aiReviewSummary;
+      }
+
+      if (req.body.reviewKeywords !== undefined) {
+        product.reviewKeywords = req.body.reviewKeywords;
+      }
+
+      if (req.body.bannerImages !== undefined && Array.isArray(req.body.bannerImages)) {
+        let processedBannerImages = [];
+        for (const img of req.body.bannerImages) {
+          if (img.startsWith('data:')) {
+            const uploadedUrl = await uploadToCloudinary(img);
+            processedBannerImages.push(uploadedUrl);
+          } else {
+            processedBannerImages.push(img);
+          }
+        }
+        product.bannerImages = processedBannerImages;
       }
 
       const updatedProduct = await product.save();
