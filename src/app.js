@@ -22,6 +22,8 @@ import analyticsRoutes from './routes/analyticsRoutes.js';
 import footerRoutes from './routes/footerRoutes.js';
 import activityRoutes from './routes/activityRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
+import customerRoutes from './routes/customerRoutes.js';
+
 
 
 // Import Middleware
@@ -55,9 +57,13 @@ app.use(cors({
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.indexOf(origin) !== -1 || origin.endsWith('.vercel.app')) {
+    // In development, allow all from localhost/127.0.0.1
+    const isLocal = origin.includes('localhost') || origin.includes('127.0.0.1');
+    
+    if (isLocal || allowedOrigins.indexOf(origin) !== -1 || origin.endsWith('.vercel.app')) {
       callback(null, true);
     } else {
+      console.log('Blocked by CORS:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -65,6 +71,7 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
 
 // 2. Logging
 app.use((req, res, next) => {
@@ -98,6 +105,8 @@ app.use('/api/aitags', aiTagRoutes);
 app.use('/api/footer', footerRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/customers', customerRoutes);
+
 
 // Health Check Endpoint
 app.get('/api', (req, res) => {
