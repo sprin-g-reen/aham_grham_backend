@@ -146,4 +146,36 @@ const generateToken = (id) => {
   });
 };
 
-export { authAdmin, registerAdmin, getAdminProfile, logoutAdmin, updateAdminPassword };
+// @desc    Update admin profile
+// @route   PUT /api/admins/profile
+// @access  Private
+const updateAdminProfile = async (req, res) => {
+  const admin = await Admin.findById(req.user._id);
+
+  if (admin) {
+    admin.name = req.body.name || admin.name;
+    admin.email = req.body.email || admin.email;
+
+    const updatedAdmin = await admin.save();
+
+    await logActivity({
+      user: updatedAdmin.name,
+      action: 'UPDATE',
+      module: 'Account',
+      description: `Admin updated profile info: ${updatedAdmin.name}`,
+      req
+    });
+
+    res.json({
+      _id: updatedAdmin._id,
+      name: updatedAdmin.name,
+      email: updatedAdmin.email,
+      role: updatedAdmin.role,
+      token: generateToken(updatedAdmin._id)
+    });
+  } else {
+    res.status(404).json({ message: 'Admin not found' });
+  }
+};
+
+export { authAdmin, registerAdmin, getAdminProfile, logoutAdmin, updateAdminPassword, updateAdminProfile };
