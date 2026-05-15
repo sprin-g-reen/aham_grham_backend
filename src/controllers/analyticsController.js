@@ -5,21 +5,37 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Helper to hash IP
-const hashIP = (ip) => {
-    return crypto.createHash('sha256').update(ip).digest('hex');
+// Professional Bot Filtering
+const isBot = (userAgent) => {
+    if (!userAgent) return false;
+    const botPattern = /bot|crawler|spider|headless|uptime|preview|slurp|facebookexternalhit|duckduckgo/i;
+    return botPattern.test(userAgent);
+};
+
+// Privacy-Safe Hashing (IP + UA)
+const generateHash = (ip, userAgent) => {
+    return crypto.createHash('sha256').update(ip + (userAgent || '')).digest('hex');
 };
 
 export const trackActivity = async (req, res) => {
     try {
-        const { type, page } = req.body;
-        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
         const userAgent = req.headers['user-agent'];
+        
+        // 1. Bot Filtering
+        if (isBot(userAgent)) {
+            return res.status(200).json({ success: true, message: 'Bot ignored' });
+        }
+
+        const { type, page, visitorId, sessionId, device } = req.body;
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
         const activity = new Analytics({
             type,
             page,
-            ipHash: hashIP(ip),
+            visitorId,
+            sessionId,
+            device: device || 'desktop',
+            ipHash: generateHash(ip, userAgent),
             userAgent
         });
 
@@ -33,52 +49,84 @@ export const trackActivity = async (req, res) => {
 
 export const getStats = async (req, res) => {
     try {
-        // If GA4 is configured, use it
         if (process.env.GA_PROPERTY_ID) {
             try {
                 const gaStats = await getGA4Stats();
                 return res.status(200).json(gaStats);
             } catch (gaError) {
-                console.error('GA4 Fetch Error, falling back to local stats:', gaError);
-                // Fallback to local stats if GA4 fails
+                console.error('GA4 Fetch Error, falling back to local:', gaError);
             }
         }
 
-        // Get total counts from local DB
-        const totalVisitors = await Analytics.countDocuments({ type: 'visitor' });
-        const totalViews = await Analytics.countDocuments({ type: 'view' });
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
 
-        // Get daily stats for the last 7 days for the chart
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-        const dailyStats = await Analytics.aggregate([
+        // Professional Aggregation
+        const stats = await Analytics.aggregate([
             {
-                $match: {
-                    timestamp: { $gte: sevenDaysAgo }
+                $facet: {
+                    "overview": [
+                        {
+                            $group: {
+                                _id: null,
+                                totalViews: { $sum: { $cond: [{ $eq: ["$type", "view"] }, 1, 0] } },
+                                uniqueVisitors: { $addToSet: "$visitorId" },
+                                totalSessions: { $addToSet: "$sessionId" }
+                            }
+                        },
+                        {
+                            $project: {
+                                totalViews: 1,
+                                uniqueVisitors: { $size: "$uniqueVisitors" },
+                                totalSessions: { $size: "$totalSessions" }
+                            }
+                        }
+                    ],
+                    "devices": [
+                        { $group: { _id: "$device", count: { $sum: 1 } } }
+                    ],
+                    "topPages": [
+                        { $match: { type: "view" } },
+                        { $group: { _id: "$page", views: { $sum: 1 } } },
+                        { $sort: { views: -1 } },
+                        { $limit: 5 }
+                    ],
+                    "chartData": [
+                        {
+                            $match: {
+                                timestamp: { $gte: new Date(new Date().setDate(new Date().getDate() - 30)) }
+                            }
+                        },
+                        {
+                            $group: {
+                                _id: { $dateToString: { format: "%Y-%m-%d", date: "$timestamp" } },
+                                views: { $sum: { $cond: [{ $eq: ["$type", "view"] }, 1, 0] } },
+                                visitors: { $addToSet: "$visitorId" }
+                            }
+                        },
+                        {
+                            $project: {
+                                date: "$_id",
+                                views: 1,
+                                visitors: { $size: "$visitors" }
+                            }
+                        },
+                        { $sort: { date: 1 } }
+                    ]
                 }
-            },
-            {
-                $group: {
-                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$timestamp" } },
-                    visitors: { $sum: { $cond: [{ $eq: ["$type", "visitor"] }, 1, 0] } },
-                    views: { $sum: { $cond: [{ $eq: ["$type", "view"] }, 1, 0] } }
-                }
-            },
-            { $sort: { "_id": 1 } }
+            }
         ]);
 
-        // Format daily stats for the chart
-        const formattedChartData = dailyStats.map(day => ({
-            date: day._id,
-            visitors: day.visitors,
-            views: day.views
-        }));
+        const result = stats[0];
+        const overview = result.overview[0] || { totalViews: 0, uniqueVisitors: 0, totalSessions: 0 };
 
         res.status(200).json({
-            totalVisitors,
-            totalViews,
-            chartData: formattedChartData
+            totalViews: overview.totalViews,
+            totalVisitors: overview.uniqueVisitors,
+            totalSessions: overview.totalSessions,
+            chartData: result.chartData,
+            devices: result.devices,
+            topPages: result.topPages
         });
     } catch (error) {
         console.error('Stats Error:', error);

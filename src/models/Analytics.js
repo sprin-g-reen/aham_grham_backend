@@ -3,7 +3,6 @@ import mongoose from 'mongoose';
 const analyticsSchema = new mongoose.Schema({
     type: {
         type: String,
-        enum: ['visitor', 'view'],
         required: true
     },
     page: {
@@ -18,8 +17,15 @@ const analyticsSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    visitorId: String,
+    sessionId: String,
+    device: {
+        type: String,
+        default: 'desktop'
+    },
     userAgent: String
 });
+
 
 // Index for faster aggregation
 analyticsSchema.index({ timestamp: -1 });
