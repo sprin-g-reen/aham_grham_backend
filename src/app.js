@@ -23,6 +23,7 @@ import footerRoutes from './routes/footerRoutes.js';
 import activityRoutes from './routes/activityRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import customerRoutes from './routes/customerRoutes.js';
+import paymentRoutes from './routes/paymentRoutes.js';
 
 
 
@@ -106,6 +107,7 @@ app.use('/api/footer', footerRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/customers', customerRoutes);
+app.use('/api/payment', paymentRoutes);
 
 
 // Health Check Endpoint

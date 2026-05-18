@@ -34,6 +34,26 @@ const customerSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Please add an address'],
     },
+    // Optional Payment / Order tracking fields
+    productName: {
+      type: String,
+      default: 'Unknown Product',
+    },
+    price: {
+      type: Number,
+      default: 0,
+    },
+    razorpayOrderId: {
+      type: String,
+    },
+    razorpayPaymentId: {
+      type: String,
+    },
+    paymentStatus: {
+      type: String,
+      enum: ['pending', 'paid', 'failed'],
+      default: 'pending',
+    },
   },
   {
     timestamps: true,
