@@ -38,6 +38,22 @@ router.post('/', async (req, res) => {
   }
 });
 
+// @desc    Get a single customer by ID
+// @route   GET /api/customers/:id
+// @access  Public
+router.get('/:id', async (req, res) => {
+  try {
+    const customer = await Customer.findById(req.params.id);
+    if (customer) {
+      res.json(customer);
+    } else {
+      res.status(404).json({ message: 'Customer not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // @desc    Delete a customer
 // @route   DELETE /api/customers/:id
 // @access  Private/Admin
