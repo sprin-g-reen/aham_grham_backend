@@ -45,29 +45,8 @@ const app = express();
 
 // --- Standard Middleware ---
 // 1. CORS - MUST BE FIRST
-const allowedOrigins = [
-  'https://aham-grham-website.vercel.app',
-  'https://aham-grham-admin.vercel.app',
-  'http://localhost:3000',
-  'http://localhost:5173',
-  'http://localhost:5174'
-];
-
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    // In development, allow all from localhost/127.0.0.1
-    const isLocal = origin.includes('localhost') || origin.includes('127.0.0.1');
-    
-    if (isLocal || allowedOrigins.indexOf(origin) !== -1 || origin.endsWith('.vercel.app')) {
-      callback(null, true);
-    } else {
-      console.log('Blocked by CORS:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
