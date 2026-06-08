@@ -20,6 +20,7 @@ export const createOrder = async (req, res) => {
       amount: amountInPaise,
       currency,
       receipt: receiptId || `receipt_${Date.now()}`,
+      payment_capture: 1,
     };
 
     console.log(`📡 Creating Razorpay Order for amount: ${amount} INR (${amountInPaise} Paise)`);
